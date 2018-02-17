@@ -1,3 +1,5 @@
+# -- 日付を計算するクラス
+
 require 'bundler'
 Bundler.require
 
@@ -9,7 +11,6 @@ class DateCalculate
   attr_reader :exec_date,      # 処理日
               :first_date,     # 基準月(処理日翌月)の1日
               :last_date,      # 基準月(処理日翌月)の末日
-              :specific_date,  # 基準月(処理日翌月)の指定日
               :format_yyyymmdd # 'yyyy/mm/dd' 0埋め無し
 
   # -- 通常は翌月1日を基準月とするが、引数'yyyymmdd'も渡せる
@@ -39,7 +40,7 @@ class DateCalculate
 
   # -- 基準月(処理日翌月)の指定日を返す
   def specific_date(dd:)
-    Date.parse(first_date.strftime('%Y%m') + dd)
+    Date.parse(first_date.strftime('%Y%m') + format("%02d", dd))
   end
 
   # -- 休日:true,平日:false
@@ -84,11 +85,11 @@ class DateCalculate
     
     (1..day).each do |i|
       if holiday?(date: date)
-        p "-- holiday #{i}, #{date}"
-        date += 1
+#        p "-- holiday #{i}, #{date}"
+        date +=1
         redo
       else
-        p "-- business day #{i}, #{date}"
+#        p "-- business day #{i}, #{date}"
         date += 1 if i != day
       end
     end
@@ -104,11 +105,11 @@ class DateCalculate
     
     (1..day).each do |i|
       if holiday?(date: date)
-        p "-- holiday #{i}, #{date}"
+#        p "-- holiday #{i}, #{date}"
         date -= 1
         redo
       else
-        p "-- business day #{i}, #{date}"
+#        p "-- business day #{i}, #{date}"
         date -= 1 if i != day
       end
     end
@@ -122,24 +123,33 @@ class DateCalculate
 
       # チケット番号ごとに日付関連修正
       case condition
-      # 1日から月末最終営業日まで
+      # 1営業日から月末最終営業日まで
       when "this_month"
-        start_end[:start] = first_date.strftime(format_yyyymmdd)
+        start_end[:start] = recent_next_business_day
         start_end[:end]   = recent_prev_business_day
-      # 1日から5営業日まで
-      when "before_5th_business_day"
-        start_end[:start] = first_date.strftime(format_yyyymmdd)
+
+      # 1営業日から5営業日まで
+      when "between_1st_biz_to_5th_biz"
+        start_end[:start] = recent_next_business_day
         start_end[:end]   = add_x_business_day(day: 4)
+
       # 第6営業日(本締め翌日)
-      when "6th_business_day"
+      when "on_6th_biz"
         start_end[:start] = add_x_business_day(day: 5)
         start_end[:end]   = add_x_business_day(day: 5)
+
+      # 第6営業日(本締め翌日)から15日まで
+      when "between_6th_biz_to_15th"
+        start_end[:start] = add_x_business_day(day: 5)
+        start_end[:end]   = add_x_day(day: 14)
+
       # 15日から月末3営業日前まで
-      when "after_15_day"
-        start_end[:start] = add_x_day(day: 15)
+      when "between_15th_to_last_3rd_biz"
+        start_end[:start] = add_x_day(day: 14)
         start_end[:end]   = sub_x_business_day(day: 3)
+
       # 月末3営業日前から月末最終営業日まで
-      when "last_3_bussines_day"
+      when "last_3rd_biz"
         start_end[:start] = sub_x_business_day(day: 3)
         start_end[:end]   = recent_prev_business_day
       end
@@ -148,32 +158,3 @@ class DateCalculate
   end
 
 end
-
-
-#exit if $0 != __FILE__
-#
-#std_date = DateCalculate.new
-#p "exec_date   : #{std_date.exec_date}"
-#p "first_date  : #{std_date.first_date}"
-#p "last_date   : #{std_date.last_date}"
-#p "add_3_day   : #{std_date.add_x_day(day: 3)}"
-#p "15th_add_3_day : #{std_date.add_x_day(dd: '15', day: 3)}"
-#p "sub_3_day   : #{std_date.sub_x_day(day: 3)}"
-#p "recent_next_business_day : #{std_date.recent_next_business_day}"
-#p "recent_prev_business_day : #{std_date.recent_prev_business_day}"
-#p "add_3_business_day : #{std_date.add_x_business_day(day: 3)}"
-#p "sub_3_business_day : #{std_date.sub_x_business_day(day: 3)}"
-#
-#p '----------------'
-#
-#prm_date = DateCalculate.new(date: '20180308')
-#p "exec_date   : #{prm_date.exec_date}"
-#p "first_date  : #{prm_date.first_date}"
-#p "last_date   : #{prm_date.last_date}"
-#p "add_3_day   : #{prm_date.add_x_day(day: 3)}"
-#p "sub_3_day   : #{prm_date.sub_x_day(day: 3)}"
-#p "recent_next_business_day : #{prm_date.recent_next_business_day}"
-#p "recent_prev_business_day : #{prm_date.recent_prev_business_day}"
-#p "add_3_business_day : #{prm_date.add_x_business_day(day: 3)}"
-#p "sub_3_business_day : #{prm_date.sub_x_business_day(day: 3)}"
-
