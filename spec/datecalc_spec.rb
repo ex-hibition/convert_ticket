@@ -171,10 +171,22 @@ describe DateCalculate do
         is_expected.to match( :start => '2018/3/1', :end => '2018/3/7' ) 
       end
     end
+    context '3日から5営業日(between_3rd_to_5th_biz)を指定した場合' do
+      let(:condition) { 'between_3rd_to_5th_biz' }
+      it '基準月の3日から5営業日を生成する' do
+        is_expected.to match( :start => '2018/3/3', :end => '2018/3/7' ) 
+      end
+    end
     context '5営業日(on_6th_biz)を指定した場合' do
       let(:condition) { 'on_6th_biz' }
       it '基準月の6営業日を生成する' do
         is_expected.to match( :start => '2018/3/8', :end => '2018/3/8' ) 
+      end
+    end
+    context '6営業日から10日(between_6th_biz_to_10th)を指定した場合' do
+      let(:condition) { 'between_6th_biz_to_10th' }
+      it '基準月の6営業日から10日を生成する' do
+        is_expected.to match( :start => '2018/3/8', :end => '2018/3/10' ) 
       end
     end
     context '6営業日から15日(between_6th_biz_to_15th)を指定した場合' do

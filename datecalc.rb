@@ -133,10 +133,20 @@ class DateCalculate
         start_end[:start] = recent_next_business_day
         start_end[:end]   = add_x_business_day(day: 4)
 
+      # 3日から5営業日まで
+      when "between_3rd_to_5th_biz"
+        start_end[:start] = add_x_day(day: 2)
+        start_end[:end]   = add_x_business_day(day: 4)
+
       # 第6営業日(本締め翌日)
       when "on_6th_biz"
         start_end[:start] = add_x_business_day(day: 5)
         start_end[:end]   = add_x_business_day(day: 5)
+
+      # 第6営業日(本締め翌日)から10日まで
+      when "between_6th_biz_to_10th"
+        start_end[:start] = add_x_business_day(day: 5)
+        start_end[:end]   = add_x_day(day: 9)
 
       # 第6営業日(本締め翌日)から15日まで
       when "between_6th_biz_to_15th"
